@@ -42,4 +42,34 @@ struct LSTMCell* init_lstm_cell(int input_size, int hidden_size){
     return cell;
 }   
 
+// Passo de feedforward da célula LSTM
+void lstm_passo(struct LSTMCell *cell, float *input, float *prev_hidden_state){
+    int hidden_size = sizeof(cell->hidden_state) / sizeof(float);
 
+    //Calcular entrada total
+    float *total_input = (float*) malloc(sizeof(float) * (hidden_size * 4));
+    for(int i = 0; i < hidden_size * 4; i++){
+        total_input[i] = 0;
+    }
+    for(int i = 0; i < hidden_size; i++){
+        for (int j = 0; j <hidden_size + 1; j++){
+            if(j < input_size){
+                total_input[i] += input[j] * cell->pesos_input[i * input_size + j];
+            }
+            else{
+                if(j < input_size){
+                    total_input[i] += prev_hidden_state[j] * cell->pesos_anterior[i * hidden_size + j - hidden_size];
+                }
+                else{
+                    total_input[i] += prev_hidden_state[j] * cell->pesos_anterior[i * hidden_size + j - hidden_size];
+                }
+            }
+        }
+    }
+    //Calcular portão do esquecimento (forget gate)
+    float *forget_gate = (float*) malloc(sizeof(float) * hidden_size);
+    for(int i = 0; i < hidden_size; i++){
+        forget_gate[i] = sigmoid(total_input[i]);
+    }
+
+}
