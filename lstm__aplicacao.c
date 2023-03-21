@@ -54,11 +54,11 @@ void lstm_passo(struct LSTMCell *cell, float *input, float *prev_hidden_state){
     for(int i = 0; i < hidden_size; i++){
         for (int j = 0; j <hidden_size + 1; j++){
             if(j < input_size){
-                total_input[i] += input[j] * cell->pesos_input[i * input_size + j];
+                total_input[i] += cell->biases[i];
             }
             else{
                 if(j < input_size){
-                    total_input[i] += prev_hidden_state[j] * cell->pesos_anterior[i * hidden_size + j - hidden_size];
+                    total_input[i] += input[j] * cell->pesos_input[i * input_size + j];
                 }
                 else{
                     total_input[i] += prev_hidden_state[j] * cell->pesos_anterior[i * hidden_size + j - hidden_size];
