@@ -1,0 +1,48 @@
+#include <iostream>
+#include <Eigen/Dense>
+
+using namespace Eigen;
+
+int main()
+{
+    int input_size = 3; // tamanho da entrada
+    int hidden_size = 4; // tamanho da camada oculta
+
+    // pesos da célula LSTM
+    MatrixXd W_f = MatrixXd::Random(hidden_size, input_size);
+    MatrixXd U_f = MatrixXd::Random(hidden_size, hidden_size);
+    VectorXd b_f = VectorXd::Random(hidden_size);
+    MatrixXd W_i = MatrixXd::Random(hidden_size, input_size);
+    MatrixXd U_i = MatrixXd::Random(hidden_size, hidden_size);
+    VectorXd b_i = VectorXd::Random(hidden_size);
+    MatrixXd W_c = MatrixXd::Random(hidden_size, input_size);
+    MatrixXd U_c = MatrixXd::Random(hidden_size, hidden_size);
+    VectorXd b_c = VectorXd::Random(hidden_size);
+    MatrixXd W_o = MatrixXd::Random(hidden_size, input_size);
+    MatrixXd U_o = MatrixXd::Random(hidden_size, hidden_size);
+    VectorXd b_o = VectorXd::Random(hidden_size);
+
+    // entrada e estado anterior
+    VectorXd x_t = VectorXd::Random(input_size);
+    VectorXd h_t_minus_1 = VectorXd::Random(hidden_size);
+    VectorXd c_t_minus_1 = VectorXd::Random(hidden_size);
+
+    // cálculo do gate de esquecimento (forget gate)
+    VectorXd f_t = (W_f * x_t + U_f * h_t_minus_1 + b_f).array().sigmoid();
+
+    // cálculo do gate de entrada (input gate)
+    VectorXd i_t = (W_i * x_t + U_i * h_t_minus_1 + b_i).array().sigmoid();
+
+    // cálculo do gate de saída (output gate)
+    VectorXd o_t = (W_o * x_t + U_o * h_t_minus_1 + b_o).array().sigmoid();
+
+    // cálculo do estado da célula atualizado (cell state)
+    VectorXd c_t = f_t.array() * c_t_minus_1.array() + i_t.array() * (W_c * x_t + U_c * h_t_minus_1 + b_c).array().tanh();
+
+    // cálculo da saída da célula (hidden state)
+    VectorXd h_t = o_t.array() * c_t.array().tanh();
+
+    std::cout << "Output: " << h_t << std::endl;
+
+    return 0;
+}
