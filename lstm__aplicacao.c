@@ -91,3 +91,20 @@ for(int i = 0; i < hidden_size; i++){
     cell->estado_celula[i] = cell->estado_celula[i] * forget_gate[i] + candidate_cell_state[i] * input_gate[i];
 }
 
+//Calcular outputgate (portão de saida)
+float *outputgate = (float*) malloc(sizeof(float) * hidden_size);
+for(int i = 0; i < hidden_size; i++){
+    outputgate[i] = sigmoid(total_input[i + hidden_size *3]);
+}
+
+//Calcular saída
+for(int i = 0; i < hidden_size; i++){
+    cell->hidden_state[i] = tanh(cell->cell_State[i]) * outputgate[i];
+}
+
+free(total_input);
+free(forget_gate);
+free(input_gate);
+free(candidate_cell_state);
+free(outputgate);
+
