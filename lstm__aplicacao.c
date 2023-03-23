@@ -91,3 +91,42 @@ for(int i = 0; i < hidden_size; i++){
     cell->estado_celula[i] = cell->estado_celula[i] * forget_gate[i] + candidate_cell_state[i] * input_gate[i];
 }
 
+//Calcular outputgate (portão de saida)
+float *outputgate = (float*) malloc(sizeof(float) * hidden_size);
+for(int i = 0; i < hidden_size; i++){
+    outputgate[i] = sigmoid(total_input[i + hidden_size *3]);
+}
+
+//Calcular saída
+for(int i = 0; i < hidden_size; i++){
+    cell->hidden_state[i] = tanh(cell->estado_celula[i]) * outputgate[i];
+}
+
+free(total_input);
+free(forget_gate);
+free(input_gate);
+free(candidate_cell_state);
+free(outputgate);
+
+int main(){
+    //exemplo de uso da célular
+    int input_size = 3;
+    int hidden_size = 4;
+    float input[] = {0.1, 0.2, 0.3};
+    float prev_hidden_state[] = {0.4, 0.5, 0.6, 0.7}
+    struct LSTMCell *cell = init_lstm_cell(input_size, hidden_size);
+    lstm_passo(cell, input, prev_hidden_state);
+
+    //imprimir resultado
+    printf("Tamanho oculto");
+    for(int i = 0; i < hidden_size; i ++){
+        printf("%f", cell->hidden_state[i]);
+    }
+    printf("\n");
+    free(cell->pesos_input);
+    free(cell->pesos_anterior);
+    free(cell->biases);
+    free(cell->estado_celula);
+    free(cell->hidden_state);
+    free(cell);
+}
