@@ -73,3 +73,21 @@ void lstm_passo(struct LSTMCell *cell, float *input, float *prev_hidden_state){
     }
 
 }
+
+//Calcular o portão de entrada
+float *input_gate = (float*) malloc(sizeof(float) * hidden_size);
+for(int i = 0; i < hidden_size; i++){
+    input_gate[i] = sigmoid(total_input[i + hidden_size]);
+}
+
+//calcular candidato a estado da célula
+float *candidate_cell_state = (float*) malloc(sizeof(float) * hidden_size);
+for(int i = 0; i < hidden_size; i++){
+    candidate_cell_state[i] = tanh(total_input[i + hidden_size * 2]);
+}
+
+// calcular estado da célula atualizado
+for(int i = 0; i < hidden_size; i++){
+    cell->estado_celula[i] = cell->estado_celula[i] * forget_gate[i] + candidate_cell_state[i] * input_gate[i];
+}
+
