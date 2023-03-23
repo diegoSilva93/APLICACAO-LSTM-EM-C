@@ -1,48 +1,57 @@
 #include <iostream>
-#include <Eigen/Dense>
+#include <cmath>
+#include <vector>
 
-using namespace Eigen;
+using namespace std;
 
-int main()
-{
-    int input_size = 3; // tamanho da entrada
-    int hidden_size = 4; // tamanho da camada oculta
+class LSTM_Cell {
+private:
+    double input_gate_weight;
+    double output_gate_weight;
+    double forget_gate_weight;
+    double cell_state;
+    double hidden_state;
 
-    // pesos da célula LSTM
-    MatrixXd W_f = MatrixXd::Random(hidden_size, input_size);
-    MatrixXd U_f = MatrixXd::Random(hidden_size, hidden_size);
-    VectorXd b_f = VectorXd::Random(hidden_size);
-    MatrixXd W_i = MatrixXd::Random(hidden_size, input_size);
-    MatrixXd U_i = MatrixXd::Random(hidden_size, hidden_size);
-    VectorXd b_i = VectorXd::Random(hidden_size);
-    MatrixXd W_c = MatrixXd::Random(hidden_size, input_size);
-    MatrixXd U_c = MatrixXd::Random(hidden_size, hidden_size);
-    VectorXd b_c = VectorXd::Random(hidden_size);
-    MatrixXd W_o = MatrixXd::Random(hidden_size, input_size);
-    MatrixXd U_o = MatrixXd::Random(hidden_size, hidden_size);
-    VectorXd b_o = VectorXd::Random(hidden_size);
+public:
+    LSTM_Cell() {
+        input_gate_weight = 0.5;
+        output_gate_weight = 0.5;
+        forget_gate_weight = 0.5;
+        cell_state = 0.0;
+        hidden_state = 0.0;
+    }
 
-    // entrada e estado anterior
-    VectorXd x_t = VectorXd::Random(input_size);
-    VectorXd h_t_minus_1 = VectorXd::Random(hidden_size);
-    VectorXd c_t_minus_1 = VectorXd::Random(hidden_size);
+    double sigmoid(double x) {
+        return 1.0 / (1.0 + exp(-x));
+    }
 
-    // cálculo do gate de esquecimento (forget gate)
-    VectorXd f_t = (W_f * x_t + U_f * h_t_minus_1 + b_f).array().sigmoid();
+    double tanh(double x) {
+        return (exp(x) - exp(-x)) / (exp(x) + exp(-x));
+    }
 
-    // cálculo do gate de entrada (input gate)
-    VectorXd i_t = (W_i * x_t + U_i * h_t_minus_1 + b_i).array().sigmoid();
+    void forward_pass(double input) {
+        double input_gate = sigmoid(input_gate_weight * input);
+        double output_gate = sigmoid(output_gate_weight * input);
+        double forget_gate = sigmoid(forget_gate_weight * input);
 
-    // cálculo do gate de saída (output gate)
-    VectorXd o_t = (W_o * x_t + U_o * h_t_minus_1 + b_o).array().sigmoid();
+        cell_state = forget_gate * cell_state + input_gate * tanh(input);
+        hidden_state = output_gate * tanh(cell_state);
+    }
 
-    // cálculo do estado da célula atualizado (cell state)
-    VectorXd c_t = f_t.array() * c_t_minus_1.array() + i_t.array() * (W_c * x_t + U_c * h_t_minus_1 + b_c).array().tanh();
+    double get_hidden_state() {
+        return hidden_state;
+    }
+};
 
-    // cálculo da saída da célula (hidden state)
-    VectorXd h_t = o_t.array() * c_t.array().tanh();
+int main() {
+    vector<double> input_sequence = {1.0, 2.0, 3.0, 4.0, 5.0};
+    LSTM_Cell lstm_cell;
 
-    std::cout << "Output: " << h_t << std::endl;
+    for (int i = 0; i < input_sequence.size(); i++) {
+        lstm_cell.forward_pass(input_sequence[i]);
+        double output = lstm_cell.get_hidden_state();
+        cout << "Input: " << input_sequence[i] << ", Output: " << output << endl;
+    }
 
     return 0;
 }
